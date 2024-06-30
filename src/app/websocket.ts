@@ -18,7 +18,7 @@ export const connectWebSocket = (precision = "P0") => {
   socket.onmessage = event => {
     const data = JSON.parse(event.data)
 
-    if (Array.isArray(data) && data[1] !== "hb") {
+    if (Array.isArray(data)) {
       const [, orders] = data
       store.dispatch(updateOrders(orders))
     }
@@ -27,6 +27,8 @@ export const connectWebSocket = (precision = "P0") => {
   socket.onclose = () => {
     console.log("WebSocket connection closed")
   }
+
+  // TODO: send unsubscribe to stop previous subscribution when switching to new precision etc
 }
 
 export const disconnectWebSocket = () => {
