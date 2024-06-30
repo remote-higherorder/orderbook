@@ -11,8 +11,6 @@ const OrderBook = () => {
   )
 
   useEffect(() => {
-    // after precision change, need do disconnect before reconnect
-    disconnectWebSocket()
     connectWebSocket(precision)
 
     return () => {
@@ -22,9 +20,9 @@ const OrderBook = () => {
 
   const handlePrecisionChange = (e: any) => {
     const newPrecision = e.target.value
-    dispatch(setPrecision(newPrecision))
+     // after precision change, need do disconnect before reconnect
     disconnectWebSocket()
-    connectWebSocket(newPrecision)
+    dispatch(setPrecision(newPrecision))
   }
 
   // TODO Need refactor blow methods into a new hook and unit test for them
