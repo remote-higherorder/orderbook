@@ -1,5 +1,14 @@
 # Orderbook
 
+## It has:
+
+1. react, redux and rtk
+2. listen to websocket api and update orderbook
+3. some basic tests to test the main reducer logics
+
+
+
+
 ## demo
 
 
