@@ -73,7 +73,7 @@ const OrderBook = () => {
         <td>{data[price][0]}</td>
         <td>{amount}</td>
         <td>{data[price][1]}</td>
-        <td>{data[price][2]}</td>
+        <td>{Math.abs(data[price][2])}</td>
         <td>
           <div
             style={{
