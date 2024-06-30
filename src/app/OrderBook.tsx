@@ -11,6 +11,8 @@ const OrderBook = () => {
   )
 
   useEffect(() => {
+    // after precision change, need do disconnect before reconnect
+    disconnectWebSocket()
     connectWebSocket(precision)
 
     return () => {

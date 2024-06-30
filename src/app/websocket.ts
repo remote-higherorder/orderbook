@@ -27,8 +27,6 @@ export const connectWebSocket = (precision = "P0") => {
   socket.onclose = () => {
     console.log("WebSocket connection closed")
   }
-
-  // TODO: send unsubscribe to stop previous subscribution when switching to new precision etc
 }
 
 export const disconnectWebSocket = () => {
