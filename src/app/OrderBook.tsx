@@ -49,14 +49,45 @@ const OrderBook = () => {
 
   const bidAmountTotals: number[] = useMemo(() => {
     const result: number[] = []
+    let sum = 0
     for (let i = 0; i < top10BidPrices.length; i++) {
-      const sum = top10BidPrices
-        .slice(i)
-        .reduce((acc, val) => acc + bids[val][2], 0)
+      sum += bids[top10BidPrices[i]][2]
       result.push(sum)
     }
     return result
   }, [top10BidPrices])
+
+  const dataRow = (
+    price: number,
+    data: number[][],
+    amountTotalData: number[],
+    index: number,
+  ) => {
+    const amount = Number(amountTotalData[index].toFixed(5))
+    const max = Number(
+      amountTotalData[amount > 0 ? amountTotalData.length - 1 : 0].toFixed(5),
+    )
+    const ratio = Number(((amount / max) * 100).toFixed(2))
+    return (
+      <tr>
+        <td>{data[price][0]}</td>
+        <td>{amount}</td>
+        <td>{data[price][1]}</td>
+        <td>{data[price][2]}</td>
+        <td>
+          <div
+            style={{
+              backgroundColor: amount > 0 ? "green" : "red",
+              height: "100%",
+              width: `${ratio}%`,
+            }}
+          >
+            {`${ratio}%`}
+          </div>
+        </td>
+      </tr>
+    )
+  }
 
   return (
     <div>
@@ -79,25 +110,41 @@ const OrderBook = () => {
         </select>
       </div>
       <div className="order-book">
-        <div className="asks">
-          <h2>Asks</h2>
-          <ul>
-            {top10AskPrices.map((askPrice: number, index: number) => (
-              <li
-                key={askPrice}
-              >{`Price: ${asks[askPrice][0]}, Count: ${asks[askPrice][1]}, Amount: ${asks[askPrice][2]}, Total: ${askAmountTotals[index]}`}</li>
-            ))}
-          </ul>
-        </div>
+        <h2>Asks</h2>
+        <table>
+          <thead>
+            <tr>
+              <td>Price</td>
+              <td>Total</td>
+              <td>Count</td>
+              <td>Amount</td>
+              <td width={100}>Depth</td>
+            </tr>
+          </thead>
+          <tbody>
+            {top10AskPrices.map((askPrice: number, index: number) =>
+              dataRow(askPrice, asks, askAmountTotals, index),
+            )}
+          </tbody>
+        </table>
         <div className="bids">
           <h2>Bids</h2>
-          <ul>
-            {top10BidPrices.map((bidPrice: number, index: number) => (
-              <li
-                key={bidPrice}
-              >{`Price: ${bids[bidPrice][0]}, Count: ${bids[bidPrice][1]}, Amount: ${bids[bidPrice][2]}, Total: ${bidAmountTotals[index]}`}</li>
-            ))}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <td>Price</td>
+                <td>Total</td>
+                <td>Count</td>
+                <td>Amount</td>
+                <td width={100}>Depth</td>
+              </tr>
+            </thead>
+            <tbody>
+              {top10BidPrices.map((bidPrice: number, index: number) =>
+                dataRow(bidPrice, bids, bidAmountTotals, index),
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
