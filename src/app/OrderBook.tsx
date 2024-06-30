@@ -71,7 +71,7 @@ const OrderBook = () => {
     return (
       <tr>
         <td>{data[price][0]}</td>
-        <td>{amount}</td>
+        <td>{Math.abs(amount)}</td>
         <td>{data[price][1]}</td>
         <td>{Math.abs(data[price][2])}</td>
         <td>
