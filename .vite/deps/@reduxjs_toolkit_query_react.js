@@ -12,6 +12,11 @@ import {
   skipToken
 } from "./chunk-NFBZR6UH.js";
 import {
+  configureStore,
+  createSelector,
+  isPlainObject
+} from "./chunk-7YZQG23P.js";
+import {
   Provider_default,
   ReactReduxContext,
   batch,
@@ -23,11 +28,6 @@ import {
 import {
   require_react
 } from "./chunk-TWJRYSII.js";
-import {
-  configureStore,
-  createSelector,
-  isPlainObject
-} from "./chunk-7YZQG23P.js";
 import {
   __toESM
 } from "./chunk-DC5AMYBS.js";

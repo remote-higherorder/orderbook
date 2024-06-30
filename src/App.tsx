@@ -1,15 +1,7 @@
-import "./App.css"
-import { Counter } from "./features/counter/Counter"
-import { Orders } from "./features/order/Orders"
-import { Quotes } from "./features/quotes/Quotes"
-import logo from "./logo.svg"
+import OrderBook from "./app/OrderBook"
 
 const App = () => {
-  return (
-    <div className="App">
-      <Orders />
-    </div>
-  )
+  return <OrderBook />
 }
 
 export default App

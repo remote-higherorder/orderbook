@@ -1,41 +1,97 @@
-import type { Action, ThunkAction } from "@reduxjs/toolkit"
-import { combineSlices, configureStore } from "@reduxjs/toolkit"
-import { setupListeners } from "@reduxjs/toolkit/query"
-import { orderApiSlice } from "../features/order/orderApiSlice"
+import { configureStore, createSlice } from "@reduxjs/toolkit"
+import _ from "lodash"
 
-// `combineSlices` automatically combines the reducers using
-// their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-const rootReducer = combineSlices(orderApiSlice)
-// Infer the `RootState` type from the root reducer
-export type RootState = ReturnType<typeof rootReducer>
-
-// The store setup is wrapped in `makeStore` to allow reuse
-// when setting up tests that need the same store config
-export const makeStore = (preloadedState?: Partial<RootState>) => {
-  const store = configureStore({
-    reducer: rootReducer,
-    // Adding the api middleware enables caching, invalidation, polling,
-    // and other useful features of `rtk-query`.
-    middleware: getDefaultMiddleware => {
-      return getDefaultMiddleware().concat(orderApiSlice.middleware)
-    },
-    preloadedState,
-  })
-  // configure listeners using the provided defaults
-  // optional, but required for `refetchOnFocus`/`refetchOnReconnect` behaviors
-  setupListeners(store.dispatch)
-  return store
+const initialState: {
+  askPrices: number[]
+  asks: { [key: number]: number[] }
+  bidPrices: number[]
+  bids: { [key: number]: number[] }
+  precision: string
+} = {
+  askPrices: [],
+  asks: {},
+  bidPrices: [],
+  bids: {},
+  precision: "P0", // Default precision
 }
 
-export const store = makeStore()
+const orderBookSlice = createSlice({
+  name: "orderBook",
+  initialState,
+  reducers: {
+    updateOrders(state, action) {
+      const orders = action.payload
+      // initial full orders
+      if (orders.length > 0) {
+        if (Array.isArray(orders[0])) {
+          // amount < 0 is ask order
+          const askOrders = orders.filter(
+            ([, , amount]: number[]) => amount < 0,
+          )
+          state.askPrices = _.reverse(
+            _.sortBy(askOrders.map(([price]: number[]) => price)),
+          )
 
-// Infer the type of `store`
-export type AppStore = typeof store
-// Infer the `AppDispatch` type from the store itself
-export type AppDispatch = AppStore["dispatch"]
-export type AppThunk<ThunkReturnType = void> = ThunkAction<
-  ThunkReturnType,
-  RootState,
-  unknown,
-  Action
->
+          state.asks = _.fromPairs(
+            _.map(askOrders, (array: number[]) => [array[0], array]),
+          )
+          // amount > 0 is bid order
+          const bidOrders = orders.filter(
+            ([, , amount]: number[]) => amount > 0,
+          )
+          state.bidPrices = _.reverse(
+            _.sortBy(bidOrders.map(([price]: number[]) => price)),
+          )
+          state.bids = _.fromPairs(
+            _.map(bidOrders, (array: number[]) => [array[0], array]),
+          )
+        } else {
+          // delta order
+          // either upsert at price or delete at price
+          const order = orders
+          const [price, count, amount] = order
+          if (count > 0) {
+            if (amount < 0) {
+              // upsert ask order
+              if (!state.askPrices.includes(price)) {
+                state.askPrices.push(price)
+                state.askPrices = _.reverse(_.sortBy(state.askPrices))
+              }
+              state.asks[price] = order
+            } else if (amount > 0) {
+              // upsert bid order
+              if (!state.bidPrices.includes(price)) {
+                state.bidPrices.push(price)
+                state.bidPrices = _.reverse(_.sortBy(state.bidPrices))
+              }
+              state.bids[price] = order
+            }
+          } else if (count === 0) {
+            if (amount < 0) {
+              // delete ask order
+              _.remove(state.askPrices, p => p === price)
+              delete state.asks[price]
+            } else if (amount > 0) {
+              // delete bid order
+              _.remove(state.bidPrices, p => p === price)
+              delete state.bids[price]
+            }
+          }
+        }
+      }
+    },
+    setPrecision(state, action) {
+      state.precision = action.payload
+    },
+  },
+})
+
+export const { updateOrders, setPrecision } = orderBookSlice.actions
+
+const store = configureStore({
+  reducer: {
+    orderBook: orderBookSlice.reducer,
+  },
+})
+
+export default store
