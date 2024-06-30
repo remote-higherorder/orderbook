@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { connectWebSocket, disconnectWebSocket } from "./websocket"
 import { setPrecision } from "./store"
@@ -25,8 +25,36 @@ const OrderBook = () => {
     connectWebSocket(newPrecision)
   }
 
-  const top10AskPrices: number[] = _.take(askPrices, 10)
-  const top10BidPrices: number[] = _.take(bidPrices, 10)
+  const top10AskPrices: number[] = useMemo(
+    () => _.take(askPrices, 10),
+    [askPrices],
+  )
+  const top10BidPrices: number[] = useMemo(
+    () => _.take(bidPrices, 10),
+    [bidPrices],
+  )
+
+  const askAmountTotals: number[] = useMemo(() => {
+    const result: number[] = []
+    for (let i = 0; i < top10AskPrices.length; i++) {
+      const sum = top10AskPrices
+        .slice(i)
+        .reduce((acc, val) => acc + asks[val][2], 0)
+      result.push(sum)
+    }
+    return result
+  }, [top10AskPrices])
+
+  const bidAmountTotals: number[] = useMemo(() => {
+    const result: number[] = []
+    for (let i = 0; i < top10BidPrices.length; i++) {
+      const sum = top10BidPrices
+        .slice(i)
+        .reduce((acc, val) => acc + bids[val][2], 0)
+      result.push(sum)
+    }
+    return result
+  }, [top10BidPrices])
 
   return (
     <div>
@@ -52,20 +80,20 @@ const OrderBook = () => {
         <div className="asks">
           <h2>Asks</h2>
           <ul>
-            {top10AskPrices.map((askPrice: number) => (
+            {top10AskPrices.map((askPrice: number, index: number) => (
               <li
                 key={askPrice}
-              >{`Price: ${asks[askPrice][0]}, Count: ${asks[askPrice][1]}, Amount: ${asks[askPrice][2]}`}</li>
+              >{`Price: ${asks[askPrice][0]}, Count: ${asks[askPrice][1]}, Amount: ${asks[askPrice][2]}, Total: ${askAmountTotals[index]}`}</li>
             ))}
           </ul>
         </div>
         <div className="bids">
           <h2>Bids</h2>
           <ul>
-            {top10BidPrices.map((bidPrice: number) => (
+            {top10BidPrices.map((bidPrice: number, index: number) => (
               <li
                 key={bidPrice}
-              >{`Price: ${bids[bidPrice][0]}, Count: ${bids[bidPrice][1]}, Amount: ${bids[bidPrice][2]}`}</li>
+              >{`Price: ${bids[bidPrice][0]}, Count: ${bids[bidPrice][1]}, Amount: ${bids[bidPrice][2]}, Total: ${bidAmountTotals[index]}`}</li>
             ))}
           </ul>
         </div>
