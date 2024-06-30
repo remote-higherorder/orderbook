@@ -1,7 +1,7 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit"
 import _ from "lodash"
 
-const initialState: {
+export const initialState: {
   askPrices: number[]
   asks: { [key: number]: number[] }
   bidPrices: number[]
@@ -15,7 +15,7 @@ const initialState: {
   precision: "P0", // Default precision
 }
 
-const orderBookSlice = createSlice({
+export const orderBookSlice = createSlice({
   name: "orderBook",
   initialState,
   reducers: {
@@ -86,11 +86,13 @@ const orderBookSlice = createSlice({
   },
 })
 
+export const orderBookReducer = orderBookSlice.reducer
+
 export const { updateOrders, setPrecision } = orderBookSlice.actions
 
 const store = configureStore({
   reducer: {
-    orderBook: orderBookSlice.reducer,
+    orderBook: orderBookReducer,
   },
 })
 

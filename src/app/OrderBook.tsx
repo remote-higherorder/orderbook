@@ -27,6 +27,7 @@ const OrderBook = () => {
     connectWebSocket(newPrecision)
   }
 
+  // TODO Need refactor blow methods into a new hook and unit test for them
   const top10AskPrices: number[] = useMemo(
     () => _.take(askPrices, 10),
     [askPrices],
@@ -69,7 +70,7 @@ const OrderBook = () => {
     )
     const ratio = Number(((amount / max) * 100).toFixed(2))
     return (
-      <tr>
+      <tr key={price}>
         <td>{data[price][0]}</td>
         <td>{Math.abs(amount)}</td>
         <td>{data[price][1]}</td>
