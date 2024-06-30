@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { connectWebSocket, disconnectWebSocket } from "./websocket"
 import { setPrecision } from "./store"
@@ -18,12 +18,12 @@ const OrderBook = () => {
     }
   }, [precision])
 
-  const handlePrecisionChange = (e: any) => {
+  const handlePrecisionChange = useCallback((e: any) => {
     const newPrecision = e.target.value
-     // after precision change, need do disconnect before reconnect
+    // after precision change, need do disconnect before reconnect
     disconnectWebSocket()
     dispatch(setPrecision(newPrecision))
-  }
+  }, [])
 
   // TODO Need refactor blow methods into a new hook and unit test for them
   const top10AskPrices: number[] = useMemo(
@@ -56,7 +56,7 @@ const OrderBook = () => {
     return result
   }, [top10BidPrices])
 
-  const dataRow = (
+  const dataRow = useCallback((
     price: number,
     data: number[][],
     amountTotalData: number[],
@@ -86,7 +86,7 @@ const OrderBook = () => {
         </td>
       </tr>
     )
-  }
+  }, [])
 
   return (
     <div>
